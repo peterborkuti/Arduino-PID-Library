@@ -18,6 +18,9 @@ class PID
     PID(double*, double*, double*,        // * constructor.  links the PID to the Input, Output, and 
         double, double, double, int);     //   Setpoint.  Initial tuning parameters are also set here
 	
+    void SetMillis(unsigned long(*millisFunction)());   // Sets the millis() function to be the library Arduino
+							// independent
+
     void SetMode(int Mode);               // * sets PID to either Manual (0) or Auto (non-0)
 
     bool Compute();                       // * performs the PID calculation.  it should be
@@ -63,6 +66,8 @@ class PID
     double kd;                  // * (D)erivative Tuning Parameter
 
 	int controllerDirection;
+
+    unsigned long (*func_millis)(); // * millis function
 
     double *myInput;              // * Pointers to the Input, Output, and Setpoint variables
     double *myOutput;             //   This creates a hard link between the variables and the 
