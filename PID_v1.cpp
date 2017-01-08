@@ -7,7 +7,7 @@
 
 #if ARDUINO >= 100
   #include "Arduino.h"
-#else
+#elif defined(ARDUINO)
   #include "WProgram.h"
 #endif
 
@@ -34,7 +34,10 @@ PID::PID(double* Input, double* Output, double* Setpoint,
     PID::SetControllerDirection(ControllerDirection);
     PID::SetTunings(Kp, Ki, Kd);
 
-    lastTime = millis()-SampleTime;				
+    #ifdef ARDUINO
+        func_millis = millis;
+        lastTime = func_millis()-SampleTime;
+    #endif
 }
  
  
@@ -47,7 +50,7 @@ PID::PID(double* Input, double* Output, double* Setpoint,
 bool PID::Compute()
 {
    if(!inAuto) return false;
-   unsigned long now = millis();
+   unsigned long now = func_millis();
    unsigned long timeChange = (now - lastTime);
    if(timeChange>=SampleTime)
    {
@@ -136,6 +139,18 @@ void PID::SetOutputLimits(double Min, double Max)
 	   if(ITerm > outMax) ITerm= outMax;
 	   else if(ITerm < outMin) ITerm= outMin;
    }
+}
+
+/* SetMillis(...)****************************************************************
+ * Allows the programmer to set the millis() function. For Arduino, it is set
+ * automatically in the cosntructor. On other processors, use the appropriate
+ * time function. For example on bbc micro:bit, use
+ * pid::SetMillis(uBit.systemTime)
+ ******************************************************************************/
+void PID::SetMillis(unsigned long(*millisFunction)())
+{
+    func_millis = millisFunction;
+    lastTime = func_millis()-SampleTime;
 }
 
 /* SetMode(...)****************************************************************
